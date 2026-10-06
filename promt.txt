@@ -1,0 +1,1151 @@
+Backend
+Create a production-ready Flask/FastAPI backend for a mental health prediction system with the following specifications:
+
+CONTEXT:
+- Research paper: "A Hybrid Transformer Architecture for Multiclass Mental Illness Prediction"
+- Model: Hybrid MentalBERT + MelBERT with CNN (92% accuracy)
+- Classification: 4 classes (Depression, Anxiety, BPD, PTSD)
+- Reference: IEEE Access paper, Pages 12148-12167
+
+REQUIREMENTS:
+1. Framework: FastAPI (Python 3.10+)
+2. Architecture: Clean/Hexagonal architecture with layers:
+   - API Layer (routes/endpoints)
+   - Service Layer (business logic)
+   - Repository Layer (data access)
+   - Model Layer (ML inference)
+
+3. Core Features:
+   - RESTful API endpoints for text analysis
+   - WebSocket support for real-time chat
+   - Session management with Redis
+   - Asynchronous processing with Celery
+   - Rate limiting and request validation
+   - JWT authentication
+   - CORS configuration
+
+4. API Endpoints:
+   POST /api/v1/analyze - Single text analysis
+   POST /api/v1/batch-analyze - Multiple texts
+   POST /api/v1/session/create - New session
+   GET /api/v1/session/{id}/history - Session history
+   GET /api/v1/session/{id}/summary - Analytics
+   POST /api/v1/crisis/detect - Crisis detection
+   GET /api/v1/explain/{prediction_id} - Explainable AI
+   WS /ws/chat - WebSocket for real-time
+
+5. Data Models (Pydantic):
+   - AnalysisRequest
+   - AnalysisResponse
+   - Session
+   - ChatMessage
+   - CrisisAlert
+
+6. Error Handling:
+   - Custom exception classes
+   - Proper HTTP status codes
+   - Detailed error messages
+   - Logging with structlog
+
+7. Security:
+   - Input validation and sanitization
+   - SQL injection prevention
+   - XSS protection
+   - HIPAA-compliant data handling
+   - Environment-based configuration
+
+8. Performance:
+   - Response caching with Redis
+   - Database connection pooling
+   - Async/await patterns
+   - Request queuing for ML inference
+
+DELIVERABLES:
+1. Complete project structure with folders
+2. requirements.txt with all dependencies
+3. Main application file (main.py)
+4. Route handlers (routes/)
+5. Service layer (services/)
+6. Database models (models/)
+7. Configuration management (config.py)
+8. Docker configuration
+9. API documentation (OpenAPI/Swagger)
+10. README with setup instructions
+
+CODE STYLE:
+- Type hints everywhere
+- Comprehensive docstrings
+- PEP 8 compliance
+- Async-first approach
+- Environment variables for secrets
+
+EXAMPLE STRUCTURE:
+backend/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── config.py
+│   ├── api/
+│   │   ├── v1/
+│   │   │   ├── routes/
+│   │   │   ├── dependencies.py
+│   ├── core/
+│   │   ├── security.py
+│   │   ├── logging.py
+│   ├── models/
+│   ├── services/
+│   ├── ml/
+│   │   ├── model_loader.py
+│   │   ├── predictor.py
+│   ├── db/
+│   ├── schemas/
+├── tests/
+├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
+
+Start with the main application structure and configuration setup.
+
+Prompt 2: ML Model Integration Backend
+Implement the ML model integration layer for the mental health prediction backend:
+
+CONTEXT:
+- Hybrid transformer model (MentalBERT + MelBERT + CNN)
+- TensorFlow/Keras framework
+- Model files: mental_bert weights, mel_bert weights, trained model
+- Input: Text (max 512 tokens)
+- Output: 4-class probabilities + confidence scores
+
+REQUIREMENTS:
+
+1. Model Loading Service (services/ml_service.py):
+   - Lazy loading of models (load on first request)
+   - Model caching in memory
+   - Health checks for model availability
+   - Version management
+   - Fallback to CPU if GPU unavailable
+
+2. Prediction Service:
+   - Text preprocessing (from paper pages 12153-12154)
+   - Tokenization for both BERT models
+   - Batch prediction support
+   - Confidence score calculation
+   - Response time < 2 seconds per request
+
+3. Features:
+   - Single text prediction
+   - Batch prediction (up to 100 texts)
+   - Streaming prediction for real-time chat
+   - Model warm-up on startup
+   - Prediction caching for identical inputs
+
+4. Model Components:
+```python
+   class MentalHealthMLService:
+       - load_models()
+       - preprocess_text()
+       - predict_single()
+       - predict_batch()
+       - get_model_info()
+       - calculate_confidence()
+```
+
+5. Error Handling:
+   - Model loading failures
+   - OOM errors
+   - Invalid input handling
+   - Timeout management
+
+6. Monitoring:
+   - Prediction latency tracking
+   - Model accuracy logging
+   - GPU/CPU usage metrics
+   - Request queue size
+
+7. Configuration:
+```yaml
+   model:
+     mental_bert_path: "models/mental_bert"
+     mel_bert_path: "models/mel_bert"
+     trained_model_path: "models/hybrid_model.h5"
+     max_length: 512
+     batch_size: 32
+     device: "cuda"  # or "cpu"
+```
+
+INTEGRATION POINTS:
+- Connect to FastAPI routes
+- Async prediction support
+- Redis caching for results
+- Celery tasks for batch jobs
+
+DELIVERABLES:
+1. ml_service.py with complete implementation
+2. model_loader.py for lazy loading
+3. preprocessor.py for text cleaning
+4. Unit tests for each component
+5. Performance benchmarks
+6. Memory usage profiling
+7. API endpoint integration examples
+
+Include proper error handling, logging, and documentation.
+
+Prompt 3: Crisis Detection Backend
+Build the crisis detection and intervention system backend module:
+
+CONTEXT:
+- Real-time detection of suicidal ideation and self-harm
+- Risk levels: CRITICAL, HIGH, MEDIUM, LOW, NONE
+- Emergency notification system
+- Integration with mental health resources
+
+REQUIREMENTS:
+
+1. Crisis Detection Service (services/crisis_service.py):
+   - Keyword-based detection (configurable)
+   - ML-enhanced detection
+   - Urgency scoring (0-1)
+   - Context analysis (plan, timeline, means)
+
+2. Risk Levels:
+```python
+   CRITICAL: Immediate danger, active plan
+   HIGH: Strong indicators, needs urgent help
+   MEDIUM: Warning signs, support recommended
+   LOW: Mild concerns, monitoring needed
+   NONE: No indicators detected
+```
+
+3. Features:
+   - Real-time text analysis
+   - Historical pattern analysis
+   - Escalation detection
+   - Resource recommendation engine
+
+4. Notification System:
+   - Email alerts to emergency contacts
+   - SMS integration (Twilio)
+   - Push notifications
+   - Webhook support for external systems
+
+5. Safety Plan Module:
+   - Template generation
+   - Personalized recommendations
+   - Coping strategy suggestions
+   - Emergency contact management
+
+6. Database Schema:
+```sql
+   crisis_alerts:
+     - id, user_id, session_id
+     - text_snippet, risk_level, confidence
+     - keywords_detected, urgency_score
+     - notified_contacts, timestamp
+     
+   safety_plans:
+     - id, user_id
+     - warning_signs, coping_strategies
+     - emergency_contacts, resources
+```
+
+7. API Endpoints:
+POST /api/v1/crisis/analyze
+POST /api/v1/crisis/notify
+GET /api/v1/crisis/history/{user_id}
+POST /api/v1/safety-plan/create
+GET /api/v1/safety-plan/{user_id}
+GET /api/v1/resources/{country_code}
+8. Configuration:
+```python
+   CRISIS_KEYWORDS = {
+       'critical': [...],
+       'high': [...],
+       'medium': [...]
+   }
+   
+   RESOURCES = {
+       'US': {'hotline': '988', ...},
+       'UK': {'hotline': '116 123', ...}
+   }
+   
+   NOTIFICATION_CHANNELS = ['email', 'sms', 'push']
+```
+
+9. Privacy & Compliance:
+   - HIPAA-compliant logging
+   - Encrypted storage of sensitive data
+   - Audit trail for all alerts
+   - Opt-in/opt-out management
+
+DELIVERABLES:
+1. Complete crisis_service.py
+2. notification_service.py
+3. safety_plan_service.py
+4. Database migration scripts
+5. API route handlers
+6. Unit and integration tests
+7. Documentation with examples
+8. Configuration templates
+
+Include comprehensive error handling and logging.
+
+Prompt 4: Database & Repository Layer
+Create the database layer with PostgreSQL and SQLAlchemy ORM:
+
+CONTEXT:
+- Mental health data storage
+- HIPAA-compliant data handling
+- High-performance queries
+- Data retention policies
+
+REQUIREMENTS:
+
+1. Database Schema:
+
+   Users Table:
+   - id (UUID primary key)
+   - email (unique, encrypted)
+   - created_at, updated_at
+   - settings (JSONB)
+   - consent_given (boolean)
+
+   Sessions Table:
+   - id (UUID primary key)
+   - user_id (foreign key)
+   - started_at, ended_at
+   - metadata (JSONB)
+
+   Analyses Table:
+   - id (UUID primary key)
+   - session_id (foreign key)
+   - text_hash (for duplicate detection)
+   - predictions (JSONB)
+   - confidence_scores (JSONB)
+   - created_at
+
+   Chat Messages Table:
+   - id (UUID primary key)
+   - session_id (foreign key)
+   - message (encrypted text)
+   - analysis_id (foreign key)
+   - timestamp
+
+   Crisis Alerts Table:
+   - id (UUID primary key)
+   - user_id, session_id
+   - risk_level, confidence
+   - text_snippet (encrypted)
+   - notified (boolean)
+   - created_at
+
+   Longitudinal Data Table:
+   - id (UUID primary key)
+   - user_id (foreign key)
+   - date
+   - depression_score, anxiety_score
+   - bpd_score, ptsd_score
+   - mental_health_index
+
+2. Repository Pattern:
+```python
+   class BaseRepository:
+       - create()
+       - get_by_id()
+       - update()
+       - delete()
+       - list()
+   
+   class UserRepository(BaseRepository)
+   class SessionRepository(BaseRepository)
+   class AnalysisRepository(BaseRepository)
+   class CrisisRepository(BaseRepository)
+```
+
+3. Data Access Layer:
+   - Connection pooling (50-100 connections)
+   - Query optimization with indexes
+   - Prepared statements
+   - Transaction management
+   - Read replicas support
+
+4. Security:
+   - Field-level encryption for PII
+   - Row-level security
+   - Audit logging
+   - Data anonymization utilities
+
+5. Migrations:
+   - Alembic for version control
+   - Rollback capabilities
+   - Seeding scripts
+
+6. Performance:
+   - Indexed queries
+   - Materialized views for analytics
+   - Query caching
+   - Batch operations
+
+7. Utilities:
+```python
+   - encrypt_field()
+   - decrypt_field()
+   - anonymize_user_data()
+   - export_user_data()  # GDPR compliance
+   - delete_user_data()  # Right to be forgotten
+```
+
+DELIVERABLES:
+1. models/ directory with all SQLAlchemy models
+2. repositories/ directory with repository classes
+3. alembic/ with migration scripts
+4. database.py for connection management
+5. encryption.py for field encryption
+6. seeds.py for test data
+7. Unit tests for repositories
+8. ER diagram
+9. Database documentation
+
+Include proper indexing strategy and query optimization.
+
+ FRONTEND DEVELOPMENT PROMPTS
+Prompt 5: React Frontend Architecture
+Create a modern React frontend for the mental health prediction application:
+
+CONTEXT:
+- Single Page Application (SPA)
+- Real-time chat interface
+- Interactive visualizations
+- Mobile-responsive design
+- Accessibility (WCAG 2.1 AA compliant)
+
+REQUIREMENTS:
+
+1. Tech Stack:
+   - React 18+ with TypeScript
+   - State: Redux Toolkit or Zustand
+   - Routing: React Router v6
+   - UI: Material-UI or Tailwind CSS + shadcn/ui
+   - Charts: Recharts or Chart.js
+   - Forms: React Hook Form + Zod validation
+   - Real-time: Socket.io-client
+   - HTTP: Axios with interceptors
+
+2. Project Structure:
+frontend/
+├── public/
+├── src/
+│   ├── app/
+│   │   ├── store.ts
+│   │   ├── App.tsx
+│   ├── features/
+│   │   ├── auth/
+│   │   ├── analysis/
+│   │   ├── chat/
+│   │   ├── dashboard/
+│   │   ├── history/
+│   ├── components/
+│   │   ├── common/
+│   │   ├── layout/
+│   ├── hooks/
+│   ├── services/
+│   │   ├── api.ts
+│   │   ├── websocket.ts
+│   ├── utils/
+│   ├── types/
+│   ├── constants/
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
+3. Core Pages:
+   
+   a) Landing Page:
+   - Hero section with model explanation
+   - Feature highlights
+   - Call-to-action
+   - Resources section
+
+   b) Analysis Page:
+   - Text input (textarea with char count)
+   - Real-time prediction display
+   - Confidence visualization
+   - Explanation panel (word importance)
+   - Sample texts for testing
+
+   c) Chat Interface:
+   - Real-time messaging
+   - Message analysis overlay
+   - Crisis detection alerts
+   - Typing indicators
+   - Message history
+
+   d) Dashboard:
+   - Mental health timeline graph
+   - Score trends (line charts)
+   - Prediction distribution (pie chart)
+   - Warning indicators
+   - Quick stats cards
+
+   e) History Page:
+   - Session list with filters
+   - Detailed session view
+   - Export functionality
+   - Search and sort
+
+   f) Profile/Settings:
+   - User preferences
+   - Notification settings
+   - Privacy controls
+   - Emergency contacts
+
+4. Components:
+```typescript
+   // Core Components
+   <TextAnalyzer />
+   <PredictionCard />
+   <ConfidenceBar />
+   <CrisisAlert />
+   <ChatWindow />
+   <MessageBubble />
+   <TimelineChart />
+   <MentalHealthIndex />
+   <ExplanationPanel />
+   <ResourceCard />
+   <SafetyPlanForm />
+   
+   // Common Components
+   <Button />
+   <Input />
+   <Card />
+   <Modal />
+   <Toast />
+   <LoadingSpinner />
+   <ErrorBoundary />
+```
+
+5. State Management:
+```typescript
+   // Redux Slices
+   - authSlice (user, token, isAuthenticated)
+   - analysisSlice (currentAnalysis, history)
+   - chatSlice (messages, sessions, connected)
+   - dashboardSlice (stats, trends, alerts)
+   - settingsSlice (preferences, notifications)
+```
+
+6. API Integration:
+```typescript
+   // services/api.ts
+   class APIService {
+     analyzeText()
+     batchAnalyze()
+     createSession()
+     getSessionHistory()
+     detectCrisis()
+     getExplanation()
+   }
+   
+   // services/websocket.ts
+   class WebSocketService {
+     connect()
+     disconnect()
+     sendMessage()
+     onMessageReceived()
+     onCrisisAlert()
+   }
+```
+
+7. Design System:
+   - Color palette (calming blues/greens)
+   - Typography scale
+   - Spacing system
+   - Component variants
+   - Dark mode support
+
+8. Accessibility:
+   - ARIA labels
+   - Keyboard navigation
+   - Screen reader support
+   - Focus management
+   - Color contrast compliance
+
+9. Performance:
+   - Code splitting
+   - Lazy loading
+   - Memoization (React.memo, useMemo)
+   - Virtual scrolling for long lists
+   - Image optimization
+
+DELIVERABLES:
+1. Complete React app with TypeScript
+2. All pages and components
+3. State management setup
+4. API service layer
+5. WebSocket integration
+6. Responsive styling
+7. Unit tests (Jest + React Testing Library)
+8. Storybook for component documentation
+9. Build configuration
+10. Deployment guide
+
+Start with project setup and core layout components.
+
+Prompt 6: Interactive Dashboard Frontend
+Build an interactive analytics dashboard for mental health tracking:
+
+CONTEXT:
+- Visualize longitudinal mental health data
+- Track trends and patterns
+- Early warning system
+- Gamification elements
+
+REQUIREMENTS:
+
+1. Dashboard Layout:
+┌─────────────────────────────────────┐
+│  Header (Stats Summary)             │
+├──────────┬──────────────────────────┤
+│          │                          │
+│ Sidebar  │   Main Content Area      │
+│  Nav     │   (Charts & Widgets)     │
+│          │                          │
+└──────────┴──────────────────────────┘
+2. Widgets:
+
+   a) Mental Health Index Card:
+   - Current score (0-100)
+   - Trend indicator (↑↓→)
+   - Comparison with last week
+   - Color-coded (green/yellow/red)
+
+   b) Timeline Chart:
+   - Line chart with 4 lines (D/A/B/P scores)
+   - Date range selector
+   - Zoom and pan
+   - Hover tooltips
+   - Export as image/CSV
+
+   c) Distribution Chart:
+   - Pie chart of predictions
+   - Count per category
+   - Interactive legend
+   - Click to filter
+
+   d) Trend Analysis:
+   - Linear regression line
+   - Confidence interval
+   - Prediction for next week
+   - R² score display
+
+   e) Warning Panel:
+   - List of detected warnings
+   - Severity indicators
+   - Timestamp
+   - Action buttons
+
+   f) Session Summary:
+   - Total sessions
+   - Avg session duration
+   - Most active times
+   - Platform breakdown
+
+   g) Progress Tracker:
+   - Goals and milestones
+   - Achievement badges
+   - Streak counter
+   - Motivational messages
+
+3. Interactive Features:
+   - Date range picker
+   - Filter by prediction type
+   - Compare time periods
+   - Drill-down into sessions
+   - Export reports (PDF)
+   - Share dashboard (link)
+
+4. Charts Configuration:
+```typescript
+   // Using Recharts
+   <LineChart data={timelineData}>
+     <Line dataKey="depression" stroke="#667eea" />
+     <Line dataKey="anxiety" stroke="#f093fb" />
+     <XAxis dataKey="date" />
+     <YAxis domain={[0, 1]} />
+     <Tooltip />
+     <Legend />
+   </LineChart>
+```
+
+5. Real-time Updates:
+   - WebSocket connection
+   - Live data streaming
+   - Smooth animations
+   - Notification badges
+
+6. Responsive Design:
+   - Desktop: 3-column grid
+   - Tablet: 2-column grid
+   - Mobile: Stacked single column
+   - Collapsible sidebar
+
+7. Data Processing:
+```typescript
+   // utils/dataProcessing.ts
+   - calculateTrend()
+   - detectPatterns()
+   - aggregateByPeriod()
+   - calculateStatistics()
+   - generateInsights()
+```
+
+8. Components:
+```typescript
+   <Dashboard>
+     <DashboardHeader />
+     <Sidebar />
+     <MainContent>
+       <MHIndexCard />
+       <TimelineChart />
+       <DistributionChart />
+       <TrendAnalysis />
+       <WarningPanel />
+       <SessionSummary />
+       <ProgressTracker />
+     </MainContent>
+   </Dashboard>
+```
+
+DELIVERABLES:
+1. Complete dashboard component
+2. All chart components
+3. Data processing utilities
+4. Real-time update logic
+5. Export functionality
+6. Responsive styles
+7. Unit tests
+8. Integration tests
+9. User guide
+
+Include smooth animations and loading states.
+
+Prompt 7: Real-Time Chat Interface
+Create a real-time chat interface with mental health monitoring:
+
+CONTEXT:
+- WebSocket-based messaging
+- Live analysis overlay
+- Crisis detection alerts
+- Message history
+- Typing indicators
+
+REQUIREMENTS:
+
+1. Chat Layout:
+┌─────────────────────────────────┐
+│  Chat Header (Status, Options)  │
+├─────────────────────────────────┤
+│                                 │
+│  Message List (Scrollable)      │
+│  ┌──────────────┐              │
+│  │ User Message │              │
+│  └──────────────┘              │
+│         ┌──────────────────┐   │
+│         │ Analysis Overlay │   │
+│         └──────────────────┘   │
+├─────────────────────────────────┤
+│  Input Box + Send Button        │
+└─────────────────────────────────┘
+2. Message Components:
+
+   a) MessageBubble:
+```typescript
+   interface Message {
+     id: string;
+     text: string;
+     timestamp: Date;
+     analysis?: Analysis;
+     isCrisis?: boolean;
+   }
+   
+   <MessageBubble 
+     message={msg}
+     showAnalysis={true}
+     onAnalysisClick={handleClick}
+   />
+```
+
+   b) AnalysisOverlay:
+   - Prediction scores
+   - Confidence bar
+   - Risk level indicator
+   - Expandable details
+
+   c) CrisisAlert Modal:
+   - Urgent warning banner
+   - Resources display
+   - Emergency contacts
+   - Quick action buttons
+
+3. Features:
+
+   a) Real-time Analysis:
+   - Analyze on send
+   - Show loading indicator
+   - Display results inline
+   - Expandable explanation
+
+   b) Crisis Detection:
+   - Immediate popup alert
+   - Audio/visual warning
+   - Resource recommendations
+   - Quick dial buttons
+
+   c) Message History:
+   - Infinite scroll
+   - Load previous messages
+   - Search functionality
+   - Filter by date/type
+
+   d) Typing Indicator:
+   - "User is typing..."
+   - Animated dots
+   - WebSocket-based
+
+   e) Message Actions:
+   - Copy message
+   - Report concern
+   - Share with therapist
+   - Delete message
+
+4. WebSocket Integration:
+```typescript
+   // hooks/useChat.ts
+   const useChat = (sessionId: string) => {
+     const [messages, setMessages] = useState([]);
+     const [isConnected, setIsConnected] = useState(false);
+     
+     const sendMessage = (text: string) => {
+       socket.emit('send_message', {
+         session_id: sessionId,
+         message: text
+       });
+     };
+     
+     useEffect(() => {
+       socket.on('message_analyzed', handleAnalysis);
+       socket.on('crisis_alert', handleCrisis);
+       
+       return () => {
+         socket.off('message_analyzed');
+         socket.off('crisis_alert');
+       };
+     }, []);
+     
+     return { messages, sendMessage, isConnected };
+   };
+```
+
+5. Input Component:
+```typescript
+   <ChatInput
+     onSend={handleSend}
+     maxLength={2000}
+     showCharCount={true}
+     placeholder="Share your thoughts..."
+     disabled={isSending}
+   />
+```
+
+6. Animations:
+   - Message slide-in
+   - Analysis fade-in
+   - Typing dots animation
+   - Crisis alert pulse
+   - Smooth scrolling
+
+7. Accessibility:
+   - Keyboard shortcuts (Enter to send)
+   - Screen reader announcements
+   - Focus management
+   - ARIA live regions for new messages
+
+8. State Management:
+```typescript
+   interface ChatState {
+     sessionId: string;
+     messages: Message[];
+     isConnected: boolean;
+     isSending: boolean;
+     hasUnread: boolean;
+   }
+```
+
+DELIVERABLES:
+1. Complete chat interface
+2. WebSocket hook
+3. Message components
+4. Analysis overlay
+5. Crisis alert modal
+6. Input component
+7. Message history
+8. Unit tests
+9. E2E tests (Cypress)
+10. User guide
+
+Include error handling and reconnection logic.
+
+🗄️ DATABASE & INFRASTRUCTURE PROMPTS
+Prompt 8: Database Setup & Migrations
+Set up PostgreSQL database with proper schema and migrations:
+
+CONTEXT:
+- Mental health application data
+- HIPAA compliance required
+- High read/write performance
+- Data retention policies
+
+REQUIREMENTS:
+
+1. Database Design:
+
+   Complete schema with:
+   - Users and authentication
+   - Sessions and messages
+   - Analyses and predictions
+   - Crisis alerts
+   - Longitudinal tracking
+   - Audit logs
+
+2. Encryption Strategy:
+   - Encrypt PII fields (email, messages)
+   - Use pgcrypto extension
+   - Key management with Vault
+   - Column-level encryption
+
+3. Indexes:
+```sql
+   -- Performance indexes
+   CREATE INDEX idx_analyses_session_id ON analyses(session_id);
+   CREATE INDEX idx_messages_timestamp ON messages(timestamp DESC);
+   CREATE INDEX idx_crisis_alerts_user_id ON crisis_alerts(user_id);
+   CREATE INDEX idx_longitudinal_user_date ON longitudinal_data(user_id, date);
+   
+   -- Full-text search
+   CREATE INDEX idx_messages_fts ON messages USING gin(to_tsvector('english', message));
+```
+
+4. Partitioning:
+   - Partition messages by month
+   - Partition analyses by date
+   - Automatic partition creation
+
+5. Views:
+```sql
+   -- User dashboard summary
+   CREATE VIEW user_dashboard_summary AS ...
+   
+   -- Session analytics
+   CREATE VIEW session_analytics AS ...
+   
+   -- Crisis history
+   CREATE VIEW crisis_history AS ...
+```
+
+6. Functions:
+```sql
+   -- Calculate mental health index
+   CREATE FUNCTION calculate_mh_index(user_id UUID, date_from DATE, date_to DATE)
+   RETURNS NUMERIC AS ...
+   
+   -- Detect trend
+   CREATE FUNCTION detect_trend(user_id UUID, days INTEGER)
+   RETURNS TEXT AS ...
+```
+
+7. Triggers:
+```sql
+   -- Auto-update updated_at
+   CREATE TRIGGER update_timestamp ...
+   
+   -- Audit logging
+   CREATE TRIGGER audit_log ...
+   
+   -- Crisis alert notification
+   CREATE TRIGGER crisis_notification ...
+```
+
+8. Data Retention:
+```sql
+   -- Delete old audit logs (> 2 years)
+   DELETE FROM audit_logs WHERE created_at < NOW() - INTERVAL '2 years';
+   
+   -- Archive old analyses (> 1 year)
+   -- Move to cold storage
+```
+
+9. Alembic Migrations:
+```python
+   # migrations/versions/001_initial_schema.py
+   # migrations/versions/002_add_crisis_alerts.py
+   # migrations/versions/003_add_encryption.py
+   # migrations/versions/004_add_partitioning.py
+```
+
+10. Backup Strategy:
+    - Daily full backups
+    - Hourly incremental backups
+    - Point-in-time recovery
+    - Backup encryption
+
+DELIVERABLES:
+1. Complete SQL schema file
+2. Alembic migration scripts
+3. Index creation scripts
+4. View definitions
+5. Function implementations
+6. Trigger setup
+7. Seeding scripts
+8. Backup scripts
+9. Monitoring queries
+10. ER diagram
+11. Documentation
+
+Include performance tuning recommendations.
+Prompt 9: Redis Caching Layer
+Implement Redis caching strategy for the application:
+
+CONTEXT:
+- Reduce database load
+- Cache ML predictions
+- Session storage
+- Rate limiting
+- Real-time features
+
+REQUIREMENTS:
+
+1. Cache Strategies:
+
+   a) Prediction Caching:
+```python
+   # Cache key: hash(text)
+   # TTL: 24 hours
+   # Store: {predictions, confidence, timestamp}
+   
+   def get_cached_prediction(text: str):
+       key = f"pred:{hash(text)}"
+       cached = redis.get(key)
+       if cached:
+           return json.loads(cached)
+       return None
+```
+
+   b) Session Caching:
+```python
+   # Key: session:{session_id}
+   # TTL: 1 hour
+   # Store: {user_id, created_at, metadata}
+```
+
+   c) User State:
+```python
+   # Key: user:{user_id}:state
+   # TTL: 30 minutes
+   # Store: {last_active, current_session, preferences}
+```
+
+2. Rate Limiting:
+```python
+   # Key: ratelimit:{user_id}:{endpoint}
+   # TTL: 1 minute
+   # Strategy: Token bucket
+   
+   def check_rate_limit(user_id: str, endpoint: str):
+       key = f"ratelimit:{user_id}:{endpoint}"
+       current = redis.incr(key)
+       if current == 1:
+           redis.expire(key, 60)
+       return current <= RATE_LIMIT
+```
+
+3. Real-time Features:
+
+   a) Typing Indicators:
+```python
+   # Key: typing:{session_id}:{user_id}
+   # TTL: 5 seconds
+   redis.setex(key, 5, "1")
+```
+
+   b) Online Users:
+```python
+   # Set: online_users
+   redis.sadd("online_users", user_id)
+   redis.expire(f"user:{user_id}:heartbeat", 30)
+```
+
+4. Leaderboard/Gamification:
+```python
+   # Sorted Set: user_streaks
+   redis.zadd("user_streaks", {user_id: streak_days})
+   
+   # Get top 10
+   redis.zrevrange("user_streaks", 0, 9, withscores=True)
+```
+
+5. Pub/Sub for Notifications:
+```python
+   # Publisher
+   redis.publish("crisis_alerts", json.dumps(alert))
+   
+   # Subscriber
+   pubsub = redis.pubsub()
+   pubsub.subscribe("crisis_alerts")
+   for message in pubsub.listen():
+       handle_alert(message)
+```
+
+6. Cache Invalidation:
+```python
+   # Pattern-based deletion
+   def invalidate_user_cache(user_id: str):
+       pattern = f"user:{user_id}:*"
+       keys = redis.keys(pattern)
+       if keys:
+           redis.delete(*keys)
+```
+
+7. Cache Warming:
+```python
+   # Pre-load frequently accessed data
+   def warm_cache():
+       # Load common predictions
+       # Load active sessions
+       # Load user preferences
+       pass
+```
+
+8. Monitoring:
+```python
+   # Cache hit rate
+   hits = redis.get("cache:hits")
+   misses = redis.get("cache:misses")
+   hit_rate = hits / (hits + misses)
+   
+   # Memory usage
+   info = redis.info("memory")
+```
+
+DELIVERABLES:
+1. Redis connection manager
+2. Caching service class
+3. Rate limiting middleware
+4. Pub/Sub handlers
+5. Cache warming scripts
+6. Monitoring dashboard queries
+7. Configuration templates
+8. Unit tests
+9. Performance benchmarks
+10. Documentation
+
+Include
+

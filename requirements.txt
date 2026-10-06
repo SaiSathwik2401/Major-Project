@@ -1,0 +1,14 @@
+flask
+flask-cors
+flask-socketio
+tensorflow
+transformers
+numpy
+pandas
+scikit-learn
+matplotlib
+seaborn
+opencv-python
+librosa
+lime
+shap

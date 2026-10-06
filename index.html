@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serenity AI | Mental Health Companion</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <!-- Chart.js for real-time visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Local CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-brain"></i>
+                <span>Serenity AI</span>
+            </div>
+            
+            <div class="nav-links">
+                <button class="nav-btn active" data-tab="chat">
+                    <i class="fa-solid fa-message"></i> Chat
+                </button>
+                <button class="nav-btn" data-tab="analytics">
+                    <i class="fa-solid fa-chart-pie"></i> Analytics
+                </button>
+                <button class="nav-btn" data-tab="resources">
+                    <i class="fa-solid fa-hand-holding-heart"></i> Resources
+                </button>
+            </div>
+
+            <div class="session-info">
+                <div class="status-indicator online"></div>
+                <span>System Online</span>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Chat Interface -->
+            <section id="chat-view" class="view active">
+                <div class="chat-main">
+                    <header class="chat-header">
+                        <div class="header-left">
+                            <h2>Empathy Engine</h2>
+                            <span class="subtitle">AI-Powered Mental Health Analysis</span>
+                        </div>
+                        <div class="header-right">
+                            <button id="new-session-btn" class="secondary-btn">
+                                <i class="fa-solid fa-plus"></i> New Session
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="chat-area" id="chat-container">
+                        <!-- Messages will be injected here -->
+                        <div class="message system">
+                            <div class="message-content">
+                                <p>👋 Hello! I'm here to listen. Feel free to share what's on your mind. I'll analyze our conversation to better understand your well-being.</p>
+                            </div>
+                            <div class="message-meta">Just now</div>
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <div class="typing-indicator hidden" id="typing-indicator">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <form id="chat-form">
+                            <textarea 
+                                id="message-input" 
+                                placeholder="Type a message... (Press Enter to send)"
+                                rows="1"
+                            ></textarea>
+                            <button type="submit" class="send-btn">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Real-time Analytics Dashboard (Right Panel) -->
+                <aside class="analytics-panel">
+                <h3>Live Analysis</h3>
+                
+                <div class="risk-meter-card">
+                    <h4>Current State</h4>
+                    <div class="risk-badge low" id="current-risk-badge">Stable</div>
+                </div>
+
+                <div class="metrics-grid">
+                    <!-- Depression Metric -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Depression</span>
+                            <span class="metric-value" id="val-depression">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="bar-depression" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Anxiety Metric -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Anxiety</span>
+                            <span class="metric-value" id="val-anxiety">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="bar-anxiety" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- BPD Metric -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>BPD</span>
+                            <span class="metric-value" id="val-bpd">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="bar-bpd" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- PTSD Metric -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>PTSD</span>
+                            <span class="metric-value" id="val-ptsd">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="bar-ptsd" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="emotionChart"></canvas>
+                </div>
+            </aside>
+
+            <!-- Analytics View (Hidden by default) -->
+            <section id="analytics-view" class="view hidden">
+                <header class="chat-header">
+                    <div class="header-left">
+                        <h2>Session Analytics</h2>
+                        <span class="subtitle">Deep dive into your emotional trends</span>
+                    </div>
+                </header>
+                
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <i class="fa-solid fa-clock"></i>
+                        <div class="stat-info">
+                            <span class="stat-label">Duration</span>
+                            <span class="stat-value" id="stat-duration">0 min</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-comments"></i>
+                        <div class="stat-info">
+                            <span class="stat-label">Messages</span>
+                            <span class="stat-value" id="stat-messages">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-brain"></i>
+                        <div class="stat-info">
+                            <span class="stat-label">Dominant</span>
+                            <span class="stat-value" id="stat-dominant">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-shield-heart"></i>
+                        <div class="stat-info">
+                            <span class="stat-label">Crisis Alerts</span>
+                            <span class="stat-value" id="stat-alerts">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h3>Detailed Emotion Breakdown</h3>
+                         <!-- Reuse the same canvas ID logic or creating a new one if separating views completely, 
+                              but here we'll create a new canvas for the detailed view -->
+                        <div class="chart-wrapper">
+                            <canvas id="detailedChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resources View (Hidden by default) -->
+            <section id="resources-view" class="view hidden">
+                <header class="chat-header">
+                    <div class="header-left">
+                        <h2>Mental Health Resources</h2>
+                        <span class="subtitle">Support is always available</span>
+                    </div>
+                </header>
+
+                <div class="resources-grid" id="resources-container">
+                    <!-- Resources injected via JS -->
+                    <div class="loading-resources">Loading resources...</div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Crisis Alert Modal -->
+    <div id="crisis-modal" class="modal hidden">
+        <div class="modal-content warning">
+            <div class="modal-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h2>Crisis Support Recommended</h2>
+            <p>We've detected signs of significant distress. You are not alone.</p>
+            
+            <div class="resource-list">
+                <div class="resource-item">
+                    <i class="fa-solid fa-phone"></i>
+                    <div>
+                        <strong>988</strong>
+                        <span>Suicide & Crisis Lifeline</span>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <i class="fa-solid fa-comment-sms"></i>
+                    <div>
+                        <strong>Text HOME to 741741</strong>
+                        <span>Crisis Text Line</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="primary-btn" onclick="document.getElementById('crisis-modal').classList.add('hidden')">I understand</button>
+                <a href="https://988lifeline.org/" target="_blank" class="secondary-btn">Get Help Now</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,575 @@
+# Mental Health AI Project - Complete File Structure Guide
+
+This document provides a comprehensive overview of every file in your Mental Health AI project, including their purposes, classifications (frontend/backend), and package dependencies.
+
+---
+
+## 📊 Project Overview
+
+**Project Type**: Full-Stack Mental Health Analysis Application  
+**Architecture**: Python Backend (Flask API) + HTML/CSS/JavaScript Frontend  
+**AI Model**: Hybrid Transformer (BERT-based) for Mental Health Classification
+
+---
+
+## 🗂️ File Categories
+
+### 1. Backend Python Files (AI & API)
+### 2. Frontend Files (User Interface)
+### 3. Data Files (CSV Datasets)
+### 4. Utility & Configuration Files
+### 5. Environment Files
+
+---
+
+## 1️⃣ Backend Python Files
+
+### [mental_health_api.py](file:///c:/Users/SAI/Desktop/Major-project/mental_health_api.py)
+**Type**: Backend - REST API Server  
+**Purpose**: Main Flask application that serves as the backend API server
+
+**Key Features**:
+- REST API endpoints for text analysis
+- WebSocket support for real-time chat
+- Session management
+- Integration with AI models and crisis detection
+
+**Package Dependencies**:
+```python
+flask                 # Web framework
+flask-cors           # Cross-origin resource sharing
+flask-socketio       # WebSocket support for real-time communication
+numpy                # Numerical operations
+```
+
+**Key Classes/Functions**:
+- [MentalHealthChatAPI](file:///c:/Users/SAI/Desktop/Major-project/mental_health_api.py#17-113): Main API class handling chat sessions
+- [analyze_message()](file:///c:/Users/SAI/Desktop/Major-project/mental_health_api.py#67-113): Analyzes individual chat messages
+- REST endpoints: `/api/health`, `/api/analyze`, `/api/resources`
+- WebSocket events: `send_message`, [join_session](file:///c:/Users/SAI/Desktop/Major-project/mental_health_api.py#288-298)
+
+**Imports From Other Project Files**:
+- `hybrid_classifier.HybridMentalHealthClassifier`
+- `crisis_detection.CrisisDetectionSystem`
+
+---
+
+### [hybrid_classifier.py](file:///c:/Users/SAI/Desktop/Major-project/hybrid_classifier.py)
+**Type**: Backend - AI Model Architecture  
+**Purpose**: Implements the hybrid transformer architecture for mental health classification
+
+**Key Features**:
+- Dual BERT model architecture (MentalBERT + MentalRoBERTa)
+- Cascaded CNN layers for feature extraction
+- 4-class classification (Depression, Anxiety, BPD, PTSD)
+
+**Package Dependencies**:
+```python
+tensorflow           # Deep learning framework
+transformers         # Hugging Face transformers (BERT models)
+numpy                # Array operations
+```
+
+**Key Classes/Functions**:
+- [HybridMentalHealthClassifier](file:///c:/Users/SAI/Desktop/Major-project/hybrid_classifier.py#7-270): Main model class
+- [build_model()](file:///c:/Users/SAI/Desktop/Major-project/hybrid_classifier.py#96-191): Constructs the hybrid architecture
+- [create_cnn_branch()](file:///c:/Users/SAI/Desktop/Major-project/hybrid_classifier.py#34-95): Creates CNN feature extraction layers
+- [prepare_inputs()](file:///c:/Users/SAI/Desktop/Major-project/hybrid_classifier.py#219-248): Tokenizes text for BERT models
+
+**Model Architecture**:
+1. **Input**: Text (max 512 tokens)
+2. **Branch 1**: MentalBERT → 3 CNN layers → 384-dim features
+3. **Branch 2**: MentalRoBERTa → 3 CNN layers → 384-dim features
+4. **Fusion**: Concatenate → Dense layers → 4-class output
+
+---
+
+### [crisis_detection.py](file:///c:/Users/SAI/Desktop/Major-project/crisis_detection.py)
+**Type**: Backend - Safety System  
+**Purpose**: Real-time crisis detection and intervention for suicidal ideation and self-harm
+
+**Key Features**:
+- Keyword-based crisis detection (HIGH, MEDIUM, LOW risk levels)
+- Emergency notification system
+- Safety plan generation
+- Multi-country crisis hotline resources
+
+**Package Dependencies**:
+```python
+re                   # Regular expressions for pattern matching
+numpy                # Numerical operations
+smtplib              # Email notifications (emergency alerts)
+```
+
+**Key Classes/Functions**:
+- [CrisisDetectionSystem](file:///c:/Users/SAI/Desktop/Major-project/crisis_detection.py#8-377): Main crisis detection class
+- [detect_crisis_level()](file:///c:/Users/SAI/Desktop/Major-project/crisis_detection.py#60-98): Analyzes text for crisis indicators
+- [generate_crisis_response()](file:///c:/Users/SAI/Desktop/Major-project/crisis_detection.py#142-210): Provides appropriate crisis resources
+- [send_emergency_notification()](file:///c:/Users/SAI/Desktop/Major-project/crisis_detection.py#211-257): Sends alerts to emergency contacts
+
+**Crisis Keywords Monitored**:
+- **CRITICAL**: "kill myself", "end my life", "suicide plan"
+- **HIGH**: "want to die", "self-harm", "cutting"
+- **MEDIUM**: "hopeless", "worthless", "can't go on"
+
+---
+
+### [explainable_ai.py](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py)
+**Type**: Backend - Model Interpretability  
+**Purpose**: Provides explanations for AI predictions using multiple techniques
+
+**Key Features**:
+- Attention weight visualization from BERT layers
+- LIME (Local Interpretable Model-agnostic Explanations)
+- Word importance scoring
+- HTML report generation with highlighted text
+
+**Package Dependencies**:
+```python
+tensorflow           # For model inference
+transformers         # BERT tokenizers
+numpy                # Array operations
+matplotlib           # Visualization
+seaborn              # Statistical plotting
+lime                 # Model explanation library
+shap                 # SHapley Additive exPlanations
+```
+
+**Key Classes/Functions**:
+- [ExplainableAI](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py#9-335): Main explainability class
+- [get_attention_weights()](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py#27-50): Extracts BERT attention patterns
+- [explain_with_lime()](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py#77-114): Generates LIME explanations
+- [comprehensive_explanation_report()](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py#288-335): Creates full explanation report
+
+---
+
+### [model_trainer.py](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py)
+**Type**: Backend - Training Pipeline  
+**Purpose**: Handles model training, evaluation, and performance visualization
+
+**Key Features**:
+- Training loop with callbacks (early stopping, model checkpointing)
+- Performance metrics calculation (accuracy, precision, recall, F1)
+- Confusion matrix visualization
+- ROC curve plotting
+- Training history visualization
+
+**Package Dependencies**:
+```python
+tensorflow           # Deep learning framework
+numpy                # Numerical operations
+matplotlib           # Plotting
+seaborn              # Statistical visualization
+sklearn              # Metrics and evaluation tools
+pandas               # Data handling
+```
+
+**Key Classes/Functions**:
+- [ModelTrainer](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py#10-308): Main training class
+- [train()](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py#64-107): Trains the model with validation
+- [evaluate()](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py#142-198): Computes test metrics
+- [plot_confusion_matrix()](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py#199-254): Visualizes classification results
+- [plot_training_history()](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py#108-141): Shows loss/accuracy curves
+
+**Training Configuration** (from paper):
+- Epochs: 40
+- Batch size: 64
+- Learning rate: 0.001
+- Optimizer: Adam
+
+---
+
+### [data_preprocessing.py](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py)
+**Type**: Backend - Data Pipeline  
+**Purpose**: Cleans and prepares text data for model training
+
+**Key Features**:
+- Text cleaning (remove URLs, HTML, special characters)
+- Lowercasing and whitespace normalization
+- Duplicate removal
+- Dataset balancing (10,000 samples per class)
+- Train/validation/test splitting (84.5% / 8% / 7.5%)
+
+**Package Dependencies**:
+```python
+pandas               # DataFrame operations
+numpy                # Numerical operations
+re                   # Regular expressions
+sklearn              # Train-test split, label encoding
+```
+
+**Key Classes/Functions**:
+- [MentalHealthDataPreprocessor](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py#7-178): Main preprocessing class
+- [clean_text()](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py#22-48): Text cleaning pipeline
+- [balance_dataset()](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py#75-99): Random downsampling for class balance
+- [split_dataset()](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py#115-146): Creates train/val/test splits
+
+---
+
+### [data_generator.py](file:///c:/Users/SAI/Desktop/Major-project/data_generator.py)
+**Type**: Backend - Dataset Creation  
+**Purpose**: Generates synthetic mental health datasets for testing
+
+**Key Features**:
+- Creates sample datasets with labeled mental health text
+- Generates expanded datasets by replication
+- Provides metadata about linguistic patterns
+
+**Package Dependencies**:
+```python
+pandas               # DataFrame creation
+numpy                # Random operations
+```
+
+**Output Files**:
+- [sample_mental_health_dataset.csv](file:///c:/Users/SAI/Desktop/Major-project/sample_mental_health_dataset.csv) (62 samples)
+- [expanded_mental_health_dataset.csv](file:///c:/Users/SAI/Desktop/Major-project/expanded_mental_health_dataset.csv) (400 samples)
+
+---
+
+### [check_tf.py](file:///c:/Users/SAI/Desktop/Major-project/check_tf.py)
+**Type**: Utility - Environment Check  
+**Purpose**: Quick TensorFlow version verification
+
+**Package Dependencies**:
+```python
+tensorflow           # Version check
+```
+
+---
+
+### [verify_env.py](file:///c:/Users/SAI/Desktop/Major-project/verify_env.py)
+**Type**: Utility - Dependency Verification  
+**Purpose**: Comprehensive environment validation
+
+**Package Dependencies**:
+```python
+flask                # Web framework check
+tensorflow           # Deep learning check
+cv2 (opencv-python)  # Computer vision check
+```
+
+---
+
+## 2️⃣ Frontend Files
+
+### [index.html](file:///c:/Users/SAI/Desktop/Major-project/index.html)
+**Type**: Frontend - Main UI Structure  
+**Purpose**: HTML structure for the mental health chat application
+
+**Key Features**:
+- Responsive chat interface
+- Real-time analytics dashboard
+- Crisis alert modal
+- Multi-tab navigation (Chat, Analytics, Resources)
+
+**External Dependencies**:
+```html
+<!-- Google Fonts -->
+Outfit font family
+
+<!-- Font Awesome -->
+Icons for UI elements
+
+<!-- Socket.IO -->
+Real-time WebSocket communication
+
+<!-- Chart.js -->
+Data visualization library
+```
+
+**UI Components**:
+- **Sidebar**: Navigation and session status
+- **Chat View**: Message area with live analysis panel
+- **Analytics View**: Session statistics and charts
+- **Resources View**: Mental health hotlines and resources
+- **Crisis Modal**: Emergency intervention popup
+
+---
+
+### [script.js](file:///c:/Users/SAI/Desktop/Major-project/script.js)
+**Type**: Frontend - Application Logic  
+**Purpose**: JavaScript logic for chat functionality and API communication
+
+**Key Features**:
+- WebSocket connection to backend (`http://localhost:5000`)
+- Real-time message handling
+- Dynamic metrics updates (Depression, Anxiety, BPD, PTSD)
+- Chart.js radar chart for emotion visualization
+- Tab switching logic
+- Crisis alert handling
+
+**External Dependencies**:
+```javascript
+Socket.IO            // WebSocket client
+Chart.js             // Visualization library
+```
+
+**Key Functions**:
+- [createSession()](file:///c:/Users/SAI/Desktop/Major-project/script.js#33-50): Initializes chat session
+- [addMessage()](file:///c:/Users/SAI/Desktop/Major-project/script.js#113-131): Adds messages to chat UI
+- [updateMetrics()](file:///c:/Users/SAI/Desktop/Major-project/script.js#145-155): Updates real-time analytics
+- [loadAnalytics()](file:///c:/Users/SAI/Desktop/Major-project/script.js#276-296): Fetches session summary
+- [loadResources()](file:///c:/Users/SAI/Desktop/Major-project/script.js#297-356): Loads mental health resources
+
+**API Endpoints Used**:
+- `POST /api/session/create`
+- `GET /api/session/{id}/summary`
+- `GET /api/resources`
+
+---
+
+### [style.css](file:///c:/Users/SAI/Desktop/Major-project/style.css)
+**Type**: Frontend - Styling  
+**Purpose**: Modern, dark-themed UI styling with glassmorphism effects
+
+**Key Features**:
+- CSS custom properties (variables) for theming
+- Responsive grid layouts
+- Smooth animations and transitions
+- Glassmorphism effects (backdrop blur)
+- Color-coded progress bars for mental health metrics
+
+**Design System**:
+```css
+--primary: #6366f1       /* Indigo */
+--secondary: #ec4899     /* Pink */
+--bg-dark: #0f172a       /* Dark blue-gray */
+--success: #22c55e       /* Green */
+--warning: #eab308       /* Yellow */
+--danger: #ef4444        /* Red */
+```
+
+---
+
+## 3️⃣ Data Files (CSV)
+
+### [expanded_mental_health_dataset.csv](file:///c:/Users/SAI/Desktop/Major-project/expanded_mental_health_dataset.csv)
+**Type**: Data - Training Source  
+**Purpose**: Primary dataset for model training (400 rows)
+
+**Columns**:
+- [text](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py#22-48): Mental health-related text
+- [label](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py#100-114): Category (depression, anxiety, bpd, ptsd)
+- `label_encoded`: Numeric encoding (0, 1, 2, 3)
+
+**Generated By**: [data_generator.py](file:///c:/Users/SAI/Desktop/Major-project/data_generator.py)
+
+---
+
+### [sample_mental_health_dataset.csv](file:///c:/Users/SAI/Desktop/Major-project/sample_mental_health_dataset.csv)
+**Type**: Data - Sample Dataset  
+**Purpose**: Smaller sample dataset (62 unique samples)
+
+**Generated By**: [data_generator.py](file:///c:/Users/SAI/Desktop/Major-project/data_generator.py)
+
+---
+
+### [train_data.csv](file:///c:/Users/SAI/Desktop/Major-project/train_data.csv)
+**Type**: Data - Training Split  
+**Purpose**: Training set (~84.5% of data)
+
+**Columns**:
+- [text](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py#22-48): Original text
+- [label](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py#100-114): Category label
+- `label_encoded`: Numeric label
+- `text_clean`: Preprocessed text (lowercase, no URLs)
+
+**Generated By**: [data_preprocessing.py](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py)
+
+---
+
+### [val_data.csv](file:///c:/Users/SAI/Desktop/Major-project/val_data.csv)
+**Type**: Data - Validation Split  
+**Purpose**: Validation set (~8% of data)
+
+**Generated By**: [data_preprocessing.py](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py)
+
+---
+
+### [test_data.csv](file:///c:/Users/SAI/Desktop/Major-project/test_data.csv)
+**Type**: Data - Test Split  
+**Purpose**: Test set (~7.5% of data)
+
+**Generated By**: [data_preprocessing.py](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py)
+
+---
+
+## 4️⃣ Configuration & Documentation Files
+
+### [requirements.txt](file:///c:/Users/SAI/Desktop/Major-project/requirements.txt)
+**Type**: Configuration - Python Dependencies  
+**Purpose**: Lists all required Python packages
+
+**Contents**:
+```
+flask                # Web framework
+flask-cors          # CORS support
+flask-socketio      # WebSocket support
+tensorflow          # Deep learning
+transformers        # BERT models
+numpy               # Numerical computing
+pandas              # Data manipulation
+scikit-learn        # ML utilities
+matplotlib          # Plotting
+seaborn             # Statistical visualization
+opencv-python       # Computer vision
+librosa             # Audio processing
+lime                # Model explanation
+shap                # Model explanation
+```
+
+---
+
+### [HOW_TO_RUN.md](file:///c:/Users/SAI/Desktop/Major-project/HOW_TO_RUN.md)
+**Type**: Documentation - Setup Guide  
+**Purpose**: Instructions for running the project
+
+**Steps Covered**:
+1. Install dependencies (`pip install -r requirements.txt`)
+2. Start backend server (`python mental_health_api.py`)
+3. Open [index.html](file:///c:/Users/SAI/Desktop/Major-project/index.html) in browser
+4. Test the application
+
+---
+
+### [run_project.bat](file:///c:/Users/SAI/Desktop/Major-project/run_project.bat)
+**Type**: Utility - Windows Launcher Script  
+**Purpose**: Automated project launcher for Windows
+
+**Features**:
+- Activates virtual environment (`mental_env`)
+- Creates environment if missing
+- Installs dependencies
+- Starts Flask server
+
+---
+
+## 5️⃣ Environment Files
+
+### `mental_env/` (Directory)
+**Type**: Virtual Environment  
+**Purpose**: Isolated Python environment for project dependencies
+
+**Contains**: Python interpreter, installed packages, activation scripts
+
+---
+
+## 📦 Complete Package Dependency Map
+
+### Backend Packages
+
+| Package | Used In | Purpose |
+|---------|---------|---------|
+| `flask` | [mental_health_api.py](file:///c:/Users/SAI/Desktop/Major-project/mental_health_api.py) | Web server framework |
+| `flask-cors` | [mental_health_api.py](file:///c:/Users/SAI/Desktop/Major-project/mental_health_api.py) | Cross-origin requests |
+| `flask-socketio` | [mental_health_api.py](file:///c:/Users/SAI/Desktop/Major-project/mental_health_api.py) | Real-time WebSocket |
+| `tensorflow` | [hybrid_classifier.py](file:///c:/Users/SAI/Desktop/Major-project/hybrid_classifier.py), [model_trainer.py](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py), [explainable_ai.py](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py) | Deep learning |
+| `transformers` | [hybrid_classifier.py](file:///c:/Users/SAI/Desktop/Major-project/hybrid_classifier.py), [explainable_ai.py](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py) | BERT models |
+| `numpy` | All Python files | Numerical operations |
+| `pandas` | [data_generator.py](file:///c:/Users/SAI/Desktop/Major-project/data_generator.py), [data_preprocessing.py](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py), [model_trainer.py](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py) | Data manipulation |
+| `scikit-learn` | [data_preprocessing.py](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py), [model_trainer.py](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py) | ML utilities |
+| `matplotlib` | [model_trainer.py](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py), [explainable_ai.py](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py) | Plotting |
+| `seaborn` | [model_trainer.py](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py), [explainable_ai.py](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py) | Statistical plots |
+| [lime](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py#77-114) | [explainable_ai.py](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py) | Model explanations |
+| `shap` | [explainable_ai.py](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py) | Model explanations |
+| `opencv-python` | [verify_env.py](file:///c:/Users/SAI/Desktop/Major-project/verify_env.py) | Computer vision (future use) |
+| `librosa` | (Not currently used) | Audio processing (future use) |
+
+### Frontend Libraries (CDN)
+
+| Library | Used In | Purpose |
+|---------|---------|---------|
+| Socket.IO | [index.html](file:///c:/Users/SAI/Desktop/Major-project/index.html), [script.js](file:///c:/Users/SAI/Desktop/Major-project/script.js) | WebSocket client |
+| Chart.js | [index.html](file:///c:/Users/SAI/Desktop/Major-project/index.html), [script.js](file:///c:/Users/SAI/Desktop/Major-project/script.js) | Data visualization |
+| Font Awesome | [index.html](file:///c:/Users/SAI/Desktop/Major-project/index.html) | Icons |
+| Google Fonts (Outfit) | [index.html](file:///c:/Users/SAI/Desktop/Major-project/index.html) | Typography |
+
+---
+
+## 🔄 Data Flow Diagram
+
+```mermaid
+graph TD
+    A[data_generator.py] -->|Creates| B(expanded_mental_health_dataset.csv)
+    B -->|Input to| C[data_preprocessing.py]
+    C -->|Splits into| D(train_data.csv)
+    C -->|Splits into| E(val_data.csv)
+    C -->|Splits into| F(test_data.csv)
+    
+    D -->|Trains| G[model_trainer.py]
+    E -->|Validates| G
+    F -->|Tests| G
+    
+    G -->|Builds| H[hybrid_classifier.py]
+    H -->|Used by| I[mental_health_api.py]
+    
+    J[crisis_detection.py] -->|Integrated in| I
+    K[explainable_ai.py] -->|Integrated in| I
+    
+    I -->|REST API| L[script.js]
+    L -->|Updates| M[index.html]
+    M -->|Styled by| N[style.css]
+```
+
+---
+
+## 🚀 Application Workflow
+
+### 1. **User Opens Application**
+- Browser loads [index.html](file:///c:/Users/SAI/Desktop/Major-project/index.html)
+- [style.css](file:///c:/Users/SAI/Desktop/Major-project/style.css) applies styling
+- [script.js](file:///c:/Users/SAI/Desktop/Major-project/script.js) initializes
+
+### 2. **Backend Connection**
+- [script.js](file:///c:/Users/SAI/Desktop/Major-project/script.js) connects to Flask server via Socket.IO
+- Creates session via `POST /api/session/create`
+
+### 3. **User Sends Message**
+- Text entered in chat interface
+- Sent to backend via WebSocket (`send_message` event)
+
+### 4. **Backend Processing**
+- [mental_health_api.py](file:///c:/Users/SAI/Desktop/Major-project/mental_health_api.py) receives message
+- [hybrid_classifier.py](file:///c:/Users/SAI/Desktop/Major-project/hybrid_classifier.py) analyzes text
+- [crisis_detection.py](file:///c:/Users/SAI/Desktop/Major-project/crisis_detection.py) checks for crisis indicators
+
+### 5. **Response Sent**
+- Analysis results sent back via WebSocket
+- Frontend updates metrics and displays response
+
+---
+
+## 📊 Summary Table
+
+| File | Type | Primary Language | Purpose |
+|------|------|------------------|---------|
+| [mental_health_api.py](file:///c:/Users/SAI/Desktop/Major-project/mental_health_api.py) | Backend | Python | REST API & WebSocket server |
+| [hybrid_classifier.py](file:///c:/Users/SAI/Desktop/Major-project/hybrid_classifier.py) | Backend | Python | AI model architecture |
+| [crisis_detection.py](file:///c:/Users/SAI/Desktop/Major-project/crisis_detection.py) | Backend | Python | Crisis detection system |
+| [explainable_ai.py](file:///c:/Users/SAI/Desktop/Major-project/explainable_ai.py) | Backend | Python | Model interpretability |
+| [model_trainer.py](file:///c:/Users/SAI/Desktop/Major-project/model_trainer.py) | Backend | Python | Training pipeline |
+| [data_preprocessing.py](file:///c:/Users/SAI/Desktop/Major-project/data_preprocessing.py) | Backend | Python | Data cleaning |
+| [data_generator.py](file:///c:/Users/SAI/Desktop/Major-project/data_generator.py) | Backend | Python | Dataset generation |
+| [index.html](file:///c:/Users/SAI/Desktop/Major-project/index.html) | Frontend | HTML | UI structure |
+| [script.js](file:///c:/Users/SAI/Desktop/Major-project/script.js) | Frontend | JavaScript | Application logic |
+| [style.css](file:///c:/Users/SAI/Desktop/Major-project/style.css) | Frontend | CSS | Styling |
+| `*.csv` | Data | CSV | Training/test datasets |
+| [requirements.txt](file:///c:/Users/SAI/Desktop/Major-project/requirements.txt) | Config | Text | Python dependencies |
+| [run_project.bat](file:///c:/Users/SAI/Desktop/Major-project/run_project.bat) | Utility | Batch | Windows launcher |
+
+---
+
+## 🎯 Key Takeaways
+
+1. **Backend**: Python-based with Flask serving REST API and WebSocket endpoints
+2. **Frontend**: Vanilla HTML/CSS/JavaScript with Socket.IO and Chart.js
+3. **AI Model**: Hybrid BERT architecture with CNN feature extraction
+4. **Safety**: Real-time crisis detection with emergency intervention
+5. **Data Pipeline**: Automated preprocessing and train/val/test splitting
+6. **Explainability**: Multiple techniques (LIME, SHAP, attention visualization)
+
+---
+
+**Last Updated**: 2025-12-24  
+**Project Location**: `c:\Users\SAI\Desktop\Major-project`
